@@ -1,0 +1,30 @@
+---
+title: "Leaflet_plot"
+author: "Lihan"
+date: "2021/11/20"
+output: html_document
+---
+## get a map of my favorite drink store near school!
+
+1. set map
+
+```{r }
+library(leaflet)
+Drink_Map <- leaflet()
+Drink_Map <- addTiles(Drink_Map)
+
+```
+2. insert the data of drink store
+
+```{r }
+Drink_Map <- addMarkers(Drink_Map, lng=121.532226, lat=25.015681, popup="五桐號") 
+Drink_Map <- addMarkers(Drink_Map, lng=121.532281, lat=25.015685, popup="麻古茶坊")
+Drink_Map <- addMarkers(Drink_Map, lng=121.533169, lat=25.017255, popup="日日裝茶")
+Drink_Map <- addMarkers(Drink_Map, lng=121.542640, lat=25.021759, popup="方最茗品")
+Drink_Map <- addMarkers(Drink_Map, lng=121.540404, lat=25.018029, popup="水雲堂")
+```
+
+3. show the map 
+
+```{r }
+Drink_Map
