@@ -1,0 +1,91 @@
+---
+title: "Practice L3"
+author: "Lihan"
+date: "2021/11/28"
+output: html_document
+---
+
+### Mission:Fix the code and show two species population growth
+
+
+#### 1.Load the package first
+
+```{r,  eval=T}
+library(animation)
+library(ggplot2)
+library (gganimate)
+```
+
+
+
+#### 2.Create the function
+
+Set the growth rate,N1[1] ans N2[1] as variable,other values set same with the wrong code.
+
+I use par() to show two species' plots at same time
+
+```{r,  eval=T}
+#start function
+grow_n1n2 <- function (growth.rate,nN1,nN2) { 
+#setting
+  num_gen<-10
+  N1 <- rep(0,10)
+  N2 <- rep(0,10)
+  generation<-1:num_gen
+  K1<-100
+  K2<-120
+  a12<-0.8
+  a21<-0.8
+  N1[1]<-nN1
+  N2[1]<-nN2
+  for (i in 2:num_gen) {
+    N1[i] = N1[i-1] + (growth.rate* N1[i-1] * ((K1-N1[i-1]-(a12*N2[i-1]))/K1))
+    N2[i] = N2[i-1] + (growth.rate* N2[i-1] * ((K2-N2[i-1]-(a21*N1[i-1]))/K2))
+    
+  }
+  par(mfrow=c(1,2))
+  plot(N1~generation,type='b', main=paste("N1 Rate =", growth.rate))
+  plot(N2~generation,type='b', main=paste("N2 Rate =", growth.rate))
+  
+}
+```
+
+#### 3.Show the difference between rate 0.5 and 1.5
+
+0.5 is similar.
+
+N1's population will go down at 8 generation while N2 will keep go up in rate 1.5 
+
+```{r,  eval=T}
+grow_n1n2(0.5,1,1)
+grow_n1n2(1.5,1,1)
+
+```
+
+#### 3.1.Show the difference between rate 0.5 and 1.5 with GIF
+
+Try animate!
+
+```{r,  eval=T}
+saveGIF({
+  for (i in 0.5:1.5){
+    grow_n1n2(i,1,1)
+  }})
+
+```
+
+
+#### 4.If there is only one species, how the population growth line will be
+
+If there aren't any other species living at same place, the generation will keep stable at carrying capacities.However, the population will go down while there are other species living with you.
+
+```{r,  eval=T}
+grow_n1n2(1.5,1,0)
+grow_n1n2(1.5,0,1)
+grow_n1n2(1.5,1,1)
+
+```
+
+
+
+
