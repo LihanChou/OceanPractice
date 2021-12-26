@@ -1,0 +1,127 @@
+---
+title: "Practice M1-Bray-Curtis Method"
+author: "Lihan"
+date: "2021/12/26"
+output: html_document
+---
+### 1.Download all the package
+
+#### Download all the packages I need.
+#### 'vegan' is the important one to calculate the abundance.
+#### 'gclus','qgraph' can plot the heat map.
+#### 'mvabund' provides the data.
+#### 'tidyr','dplyr' can sort and filter the data.
+
+```{r}
+library(vegan)
+library(gclus)
+library(qgraph)
+library(ggplot2)
+library(devtools)
+library(mvabund)
+library(tidyr)
+library(dplyr)
+```
+
+### 2.Check and seperate the data
+
+#### We use the data 'tikus', which contains the coral species information in the Tikus island during 1981 ~ 1988, to analyze the difference of abundance between 10 locations.
+
+#### First, I want to seperate the data into 3 years(1981,1983,1985), so I combine 2 dataframe in one and use the variable "time" to filter the data.
+
+#### Next, I add the site information in front of the subsets.
+
+```{r }
+data(tikus)
+# ?tikus
+tikusdat=as.mvabund(tikus$abund)
+tikusid=tikus$x
+Tikusall=cbind(tikusdat,tikusid)
+filtered81 <- filter(Tikusall, time == "81" )
+filtered83 <- filter(Tikusall, time == "83" )
+filtered85 <- filter(Tikusall, time == "85" )
+
+Site<-c(1,2,3,4,5,6,7,8,9,10)
+Fi81=cbind(Site, filtered81)
+Fi812=Fi81[,1:76]
+Fi83=cbind(Site, filtered83)
+Fi832=Fi83[,1:76]
+Fi85=cbind(Site, filtered85)
+Fi852=Fi85[,1:76]
+
+
+```
+
+### 3.Bray-Curtis
+
+#### Bray-Curtis (D14) dissimilarity is the golden ditance metric in ecology. We can calculate this with the function 'vegdist' in the package 'vegan'
+
+```{r }
+Fi81.dbc <- vegdist(Fi812,"bray")
+Fi83.dbc <- vegdist(Fi832,"bray")
+Fi85.dbc <- vegdist(Fi852,"bray")
+```
+
+### 4.Function
+
+#### It appears that the function 'coldiss' can not work. It's weird but...ok. Instead, I search the original code of it from the website.
+
+#### (https://github.com/JoeyBernhardt/NumericalEcology/blob/master/coldiss.R)
+
+```{r}
+"coldiss" <- function(D, nc = 4, byrank = TRUE, diag = FALSE)
+{
+	require(gclus)
+
+	if (max(D)>1) D <- D/max(D)
+
+	if (byrank) {
+		spe.color <- dmat.color(1-D, cm.colors(nc))
+	}
+	else {
+		spe.color <- dmat.color(1-D, byrank=FALSE, cm.colors(nc))
+	}
+
+	spe.o <- order.single(1-D)
+	speo.color <- spe.color[spe.o, spe.o]
+	
+	op <- par(mfrow=c(1,2), pty="s")
+
+	if (diag) {
+		plotcolors(spe.color, rlabels=attributes(D)$Labels, 
+			main="Dissimilarity Matrix", 
+			dlabels=attributes(D)$Labels)
+		plotcolors(speo.color, rlabels=attributes(D)$Labels[spe.o], 
+			main="Ordered Dissimilarity Matrix", 
+			dlabels=attributes(D)$Labels[spe.o])
+	}
+	else {
+		plotcolors(spe.color, rlabels=attributes(D)$Labels, 
+			main="Dissimilarity Matrix")
+		plotcolors(speo.color, rlabels=attributes(D)$Labels[spe.o], 
+			main="Ordered Dissimilarity Matrix")
+	}
+
+	par(op)
+}
+```
+
+### 5.Plot
+
+#### The results show the difference between 3 years.
+#### The El Nino in 1982 heavily disturbed the area and lead to the decrease of variety.
+#### The area seems to recover in 1985.
+
+```{r}
+#dissimilarity matrix 
+coldiss(Fi81.dbc,byrank=F,diag=T)
+coldiss(Fi83.dbc,byrank=F,diag=T)
+coldiss(Fi85.dbc,byrank=F,diag=T)
+```
+
+```{r}
+#network
+qgraph(1-Fi81.dbc, layout='spring', vsize=4)
+qgraph(1-Fi83.dbc, layout='spring', vsize=4)
+qgraph(1-Fi85.dbc, layout='spring', vsize=4)
+```
