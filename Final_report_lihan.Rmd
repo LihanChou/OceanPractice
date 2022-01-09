@@ -1,0 +1,119 @@
+---
+title: "Final Report"
+author: "Lihan"
+date: "2022/1/9"
+output: "html_document"
+---
+## The effect of rain characteristics on soil water conservation ability in Fushan headwater catchment 
+
+### 1.Introduction: 
+
+#### Spatial and temporal variations in soil moisture are key characteristics for understanding hydrological processes on a hillslope scale (Kim,2012). Most of the research focus on the spatial variation and the influence of local characteristics (Penna et al.,2013). However, temporal variation, which will show the  water conservation and regulation ability, is still not clear in the headwater catchment. 
+#### With the impact of climate change and the increase of extreme rain events, it's important to understand the dynamic of soil moisture in different weather condition. This research will use the monitor data of soil moisture during 2014, to show the temporal variation of soil moisture, and analyze the relationship between the increase water content and the characteristics of rain events.
+#### There are two main objects of this research:
+#### (1) Explore the dynamic of soil water storage and soil water recession rate through the time after rain events.
+#### (2) Analyze the correlation between rain characteristic and soil water storage and find which characteristic affecting the storage the most.  
+
+### 2.Material and method: 
+
+### 2-1 Study place
+
+#### The research site is located in the natural forest catchment area in Fushan mountain (Fig 1). In addition, the site is under the jurisdiction of the Fushan Research Center. The size of the site is 0.16ha, which is circled by black dots (Fig 2). The average annual temperature is 18.5 ℃, and it rains all year round, with an average annual rainfall about 4125 mm. In 2014, we set 10 automatic moisture meters EasyAG 50(sentek) in the sample area (Fig2,blue points) to monitor the water content in the shallow soil layer continuously. The depth we monitored is 50 cm.
+
+```{r }
+library(leaflet)
+Research_place <- leaflet()
+Research_place<-addTiles(Research_place)
+Research_place<-addMarkers(Research_place, lng=121.58504902, lat=24.75960325, popup="Fushan") 
+Research_place
+
+#getwd()
+bOUNDAR=read.csv('BLN.csv',header=T)
+mapp=read.csv('plot.csv',header=T)
+plot(bOUNDAR$x,bOUNDAR$y,ylab='lng', xlab = 'lat',las=1,pch=20)
+points(mapp$x1,mapp$y1,pch=9,col='blue')
+
+```
+
+### 2-2  Rain events seperates: 
+
+#### In this study, the continuous monitoring data was divided into single rainfall events according to the rainfall data. Based on 12 consecutive hours of no rainfall, when the rainfall was greater than or equal to 0.2 mm per 10 minutes, it is regarded as the beginning of a rainfall event. If the interval between the two rainfall records is less than 12 hours or the rainfall does not cause an increase in soil water content, it is still classified as the same event. We calculate the cumulative soil water storage after each single rain events and explore the dynamic of it. 
+#### In 2014, a total of 48 rainfall events were collected, the rainfall amount of single event was from 0.4 to 231 mm, and the average rainfall intensity was from 0.1 to 5.1 mm/hr, this result showed the diversity of rainfall patterns in this region. In order to analyze the change of water storage over time, the influence of rainfall characteristics on soil water storage and water recession rate was also discussed.
+
+### 2-3 Spearmen correlation 
+
+#### We used spearman correlation to analyze the relationship between rain event characteristics and soil water storage. On the other hand, we used the scatter plot to show the status. Walso analyzed the relationship between rain event characteristics and soil water recession rate so as to explore the water regulation ability of soil.
+
+### 3.Results:
+### 3-1 Temporal dynamic of soil water storage
+
+#### In this study, we found that the average of soil water storage after rainfall events was 5.22 mm, and it gradually decreased through time. After 7h, it could be found that the soil water recession rate slowed down, which showed that most of the water in the large pores had already flowed out, and the water in the coarse pores and fine pores began to slowly discharge the groundwater and supply plant needs. After 12h,there were still 3.14 mm water in the soil.
+```{r }
+temp=read.csv('storage3.csv',header=T)
+boxplot(temp$S0,temp$S1,temp$S2,temp$S3,temp$S4,temp$S5,temp$S6,temp$S7,temp$S8,temp$S9,temp$S10,temp$S11,temp$S12, names = c("0","1","2","3","4","5","6","7","8","9","10","11","12" ),ylab = 'Cumulative Storage volume (mm)', xlab = "hour", las=1)
+```
+
+### 3-2 Correlation between rain event characteristics and soil water storage
+
+#### The results showed that rainfall amount, rainfall intensity, and maximum rainfall intensity all significantly affect soil water storage, and there was a positive correlation, which mean the more rainfall could bring more soil water increases, and higher intensity could make it easier for water to infiltrate. However, if you look at the plot of rainfall amount and cumulative water storage, you can find that when the rainfall amount exceeds 20 mm, the water storage seemed to be decline, indicating that the soil water storage capacity is finite.
+```{r }
+par(mfrow=c(2,2))
+plot(S0 ~ rain, data = temp,xlab='Rain amount(mm)',ylab='Cumulative storage(mm)',las=1,cex=2,col = rgb (0,0,1,1),ylim=c(-5,15))
+plot(S0 ~ duration, data = temp,xlab='Duration (hr)',ylab='Cumulative storage(mm)',las=1,cex=2,col = rgb (0,1,0,1),ylim=c(-5,15))
+plot(S0 ~ intensity, data = temp,xlab='Average intensity(mm/hr)',ylab='Cumulative storage(mm)',las=1,cex=2,col = rgb (1,0.5,0,1),ylim=c(-5,15))
+plot(S0 ~ max_i, data = temp,xlab='Max intensity (mm/10min)',ylab='Cumulative storage(mm)',las=1,cex=2,col = rgb (1,1,0,1),ylim=c(-5,15))
+```
+
+```{r,  eval=T, warning=F, message=F  }
+cor.test(temp$rain,temp$S0,method="spearman")
+cor.test(temp$duration,temp$S0,method="spearman")
+cor.test(temp$intensity,temp$S0,method="spearman")
+cor.test(temp$max_i,temp$S0,method="spearman")
+```
+
+
+### 3-3 Correlation between rain event characteristics and soil water recession rate
+
+#### With the correlation coefficient and p value, it can be found that rainfall amount, rainfall intensity, and maximum rainfall intensity were significantly positively correlated with the water recession rate in the first hour after the rainfall events, which meant that the rainfall amount and intensity greater made the water loss faster after the rainfall events. 
+#### The average rainfall intensity influenced deeply than other characteristics. Although there was no significant correlation between rainfall duration and water storage, we found that faster water recession rate events were mostly short in duration.
+
+```{r }
+par(mfrow=c(2,2))
+plot(r1 ~ rain, data = temp,xlab='Rain amount(mm)',ylab='Recession rate(mm/hr)',las=1,cex=2,col = rgb (0,0,1,1),ylim=c(-2,4))
+plot(r1 ~ duration, data = temp,xlab='Duration (hr)',ylab='Recession rate(mm/hr)',las=1,cex=2,col = rgb (0,1,0,1),ylim=c(-2,4))
+plot(r1 ~ intensity, data = temp,xlab='Average intensity(mm/hr)',ylab='Recession rate(mm/hr)',las=1,cex=2,col = rgb (1,0.5,0,1),ylim=c(-2,4))
+plot(r1 ~ max_i, data = temp,xlab='Max intensity (mm/10min)',ylab='Recession rate(mm/hr)',las=1,cex=2,col = rgb (1,1,0,1),ylim=c(-2,4))
+
+```
+
+```{r,  eval=T, warning=F, message=F  }
+cor.test(temp$rain,temp$r1,method="spearman")
+cor.test(temp$duration,temp$r1,method="spearman")
+cor.test(temp$intensity,temp$r1,method="spearman")
+cor.test(temp$max_i,temp$r1,method="spearman")
+```
+
+### 4.Discussion
+
+#### Past studies often analyzed the correlation between soil water storage and geographical factors. For example, Pennal et al. (2013) found that soil water storage in downslope areas was usually slightly higher than that in upslope areas. Brocca et al. (2009) found that the temporal stability of soil water content is generally lower at steep slopes. With the climate change and increasement of extreme rainfall events in recent years, the impact of hydrological characteristics on soil water storage has gradually attracted attention. Lazo et al. (2019) conducted a linear analysis of the rainfall intensity and cumulative soil water storage of each single rainfall events, and found that the higher the intensity, the more soil water storage increase. Yinglan et al. (2018) found that rainfall amount and intensity are negatively correlated with the increase in shallow water storage, which means that water is more likely to infiltrate to deep soil layer for preservation.
+
+#### The results of this study showed that the increase of soil water storage after rainfall events had a significant positive correlation with rainfall amount and rainfall intensity. This outcome was consistent with previous studies. It means that greater the rainfall amount and rainfall intensity, more soil water storage would increase and it was easier to infiltrate in the soil layer without running off directly from the surface. However, few studies have analyzed the water recession rate. We found that the water recession rate also had a significant positive correlation with rainfall amount and rainfall intensity, which mean that more soil water increase, faster the water would loss after the rainfall events. 
+
+#### Although there was no significant correlation between rainfall duration and water recession rate and water storage. We observed that in the short duration events, the average rainfall intensity would be higher, and the water loss rate would also be faster. Therefore, the state with longer duration and lower rainfall intensity may be more suitable for water conservation.
+
+### 5.Conclusion
+
+#### (1) Temporal dynamic of soil water storage: The soil water storage average after rain events is 5.2 mm, and the water would gradually decrease after the rain. It lost in a rate of 0.3 mm per hour from the beginning, and then the speed will slow down. After 12 hours, the speed is about 0.1mm per hour, it can be found that the water recession speed is reduced to 1/3 than beginning. 
+#### (2) Correlation between characteristics of rainfall events and soil water storage: rainfall amount, rainfall intensity, and maximum rainfall intensity were all significantly affecting soil water storage, and showed a positive correlation, meaning the more rainfall amount and greater the rainfall intensity, the increase in water content would become higher. However, the increase is not unlimited, it can be found that the water storage tends to decrease after the rainfall exceeds 20mm. 
+#### (3) Correlation between characteristics of rainfall events and soil water recession rate: rainfall, rainfall intensity, and maximum rainfall intensity were also significantly positively correlated with the water recession rate in the first hour. The average intensity influenced the most. This state may not be conducive to water conservation. As a result, we should enhance the forest restoration in head catchment to face the climate change and the increase of extreme rain events in the future.
+
+
+### 6.Reference
+
+##### Brocca, L., Melone, F., Moramarco, T. and Morbidelli, R.  2009.  Soil moisture temporal stability over experimental areas in Central Italy. Geoderma 148(3-4), 364-374.
+##### Kim, S.  2012.  Characterization of annual soil moisture response pattern on a hillslope in Bongsunsa Watershed, South Korea. Journal of Hydrology 448-449, 100-111.
+##### Lazo, P.X., Mosquera, G.M., McDonnell, J.J. and Crespo, P.  2019.  The role of vegetation, soils, and precipitation on water storage and hydrological services in Andean Páramo catchments. Journal of Hydrology 572, 805-819.
+##### Penna, D., Brocca, L., Borga, M. and Dalla Fontana, G.  2013.  Soil moisture temporal stability at different depths on two alpine hillslopes during wet and dry periods. Journal of Hydrology 477, 55-71.
+##### Yinglan, A., Wang, G.Q., Sun, W.C., Xue, B.L. and Kiem, A.  2018.  Stratification response of soil water content during rainfall events under different rainfall patterns. Hydrological Processes 32(20), 3128-3139.
+
+
